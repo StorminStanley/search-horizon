@@ -1,0 +1,10 @@
+<div class="facet">
+  <div class="facet-name">{{ name|capfirst }}</div>
+  <div class="facet-values">
+    {% for key, value in values %}
+    <label class="facet-value">
+      <input type="checkbox" name="{{name}}" value="{{key}}" {% for k, v in request.GET.lists %}{%if name == k and key in v %} checked {% endif %}{% endfor %}> {{ key }} ({{ value }})
+    </label>
+    {% endfor %}
+  </div>
+</div>

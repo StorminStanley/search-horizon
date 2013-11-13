@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Search" %}{% endblock %}
+
+{% block css %}
+  {{ block.super }}
+  <style type="text/css">
+    .search .search-query {
+      width: 100%;
+      box-sizing: border-box;
+      height: 26px;
+    }
+    
+    .search .search-box {
+      box-sizing: border-box;
+      margin-right: 90px;
+      position: relative;
+      padding-bottom: 2px;
+      margin-left: 130px;
+    }
+    
+    .search .remove {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: none;
+      cursor: pointer;
+    }
+    
+    .search .source {
+      float: left;
+      width: 110px;
+    }
+    
+    .search button {
+      width: 70px;
+      box-sizing: border-box;
+      float: right;
+    }
+    
+    .search .facet-toggle {
+      margin: 10px 0 0;
+      float: right;
+      cursor: pointer;
+    }
+    
+    .search .facets {
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 10px 0 0;
+    }
+    
+    .search .facet {
+      float: left;
+      width: 20%;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    
+    .search .facet-toggle.hide, .search .facets.hide {
+      display: none;
+    }
+    
+    .search .facet-name {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    
+    .search label.facet-value {
+      display: block;
+      font-weight: normal;
+      overflow-x: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  </style>
+{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Search") %}
+{% endblock page_header %}
+
+{% block main %}
+<div class="row-fluid">
+  <form class="form-search search">
+    <button type="submit" class="btn">Search</button>
+    <select name="type" class="source">
+      <option value="" {% if view.request.GET.type == '' %} selected {% endif %}>All</option>
+      <option value="instances" {% if view.request.GET.type == 'instances' %} selected {% endif %}>Instances</option>
+      <option value="hypervisors" {% if view.request.GET.type == 'hypervisors' %} selected {% endif %}>Hypervisors</option>
+    </select>
+    <div class="search-box">
+      <input type="text" class="search-query" name="query" placeholder="*:*" value="{{ request.GET.query }}">
+      <i class="icon-remove-sign remove"></i>
+    </div>
+
+    {% if view.request.GET.type == 'instances' %}
+    
+    <div class="facet-toggle">
+      <i class="icon-chevron-down"></i> Show facets
+    </div>
+    
+    <div class="facet-toggle hide">
+      <i class="icon-chevron-up"></i> Hide facets
+    </div>
+  
+    <div class="well facets hide">
+      {% for name, values in view.facets %}
+        {% include "admin/search/facets.html" %}
+      {% endfor %}
+    </div>
+    
+    {% endif %}
+    
+  </form>
+  
+  <div>
+    {% if view.instanceresults %}{{ instances_table.render }}{% endif %}
+    {% if view.hypervisorresults %}{{ hypervisors_table.render }}{% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+  {{ block.super }}
+  <script>
+    $(document).ready(function () {
+      if ($('.search-query').val() !== '') {
+        $('.search .remove').show();
+      }
+      $('body')
+        .delegate(".facet-toggle", "click", function () {
+          $('.search .facet-toggle').toggleClass('hide');
+          $('.search .facets').toggleClass('hide');
+        })
+        .delegate(".remove", "click", function () {
+          $('.search-query').val('');
+          $('.search .remove').hide();
+        })
+        .delegate(".search-query", "input", function () {
+          if ($('.search-query').val() !== '') {
+            $('.search .remove').show();
+          } else {
+            $('.search .remove').hide();
+          }
+        })
+    })
+  </script>
+{% endblock %}
